@@ -134,19 +134,17 @@ const Dashboard: React.FC<DashboardProps> = ({ goldPrice, investments }) => {
                 title="收益"
                 value={totals.profit}
                 precision={2}
-                prefix="¥"
                 valueStyle={{ color: totals.profit >= 0 ? '#3f8600' : '#cf1322' }}
+                prefix={
+                  <span>
+                    {totals.profit >= 0 ? <ArrowUpOutlined /> : <ArrowDownOutlined />}
+                    {' ¥'}
+                  </span>
+                }
                 suffix={
                   <span style={{ fontSize: '14px', marginLeft: '8px' }}>
                     ({totals.profitRate >= 0 ? '+' : ''}{totals.profitRate.toFixed(2)}%)
                   </span>
-                }
-                prefix={
-                  totals.profit >= 0 ? (
-                    <ArrowUpOutlined />
-                  ) : (
-                    <ArrowDownOutlined />
-                  )
                 }
               />
             </Card>

@@ -62,6 +62,33 @@ npm run build
 
 构建后的文件在 `dist` 目录中，可以部署到任何静态文件服务器。
 
+## 🚀 GitHub Pages 自动部署
+
+本项目已配置 GitHub Actions，推送到 `main` 或 `master` 分支后自动构建并部署到 GitHub Pages。
+
+### 快速部署步骤
+
+1. **创建 GitHub 仓库并推送代码**：
+```bash
+git init
+git add .
+git commit -m "Initial commit: Gold Price Tracker"
+git remote add origin https://github.com/YOUR_USERNAME/GoldPriceTracker.git
+git push -u origin main
+```
+
+2. **启用 GitHub Pages**：
+   - 进入仓库 Settings → Pages
+   - Source 选择 `GitHub Actions`
+
+3. **完成！** 每次推送代码会自动部署
+
+详细说明请查看 [DEPLOY.md](./DEPLOY.md)
+
+### 访问网站
+
+部署后访问：`https://YOUR_USERNAME.github.io/GoldPriceTracker/`
+
 ## 使用说明
 
 1. **查看实时金价**：应用会自动显示当前的国际金价和人民币金价
@@ -87,7 +114,7 @@ npm run build
 ## 数据来源
 
 - 黄金价格：[Gold-API](https://api.gold-api.com)
-- 汇率数据：[ExchangeRate-API](https://api.exchangerate-api.com)
+- 汇率数据：[Open Exchange Rates API](https://open.er-api.com)
 
 ## 许可证
 

@@ -30,7 +30,7 @@ const InvestmentForm: React.FC<InvestmentFormProps> = ({ onSubmit, loading, curr
     setPricePerGram(value || 0);
   };
 
-  const useCurrent Price = () => {
+  const useCurrentPrice = () => {
     if (currentGoldPrice) {
       form.setFieldValue('pricePerGram', currentGoldPrice);
       setPricePerGram(currentGoldPrice);
