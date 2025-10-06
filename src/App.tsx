@@ -5,6 +5,7 @@ import InvestmentForm from './components/InvestmentForm';
 import InvestmentList from './components/InvestmentList';
 import { fetchGoldPrice, GoldPrice } from './services/goldService';
 import { getInvestments, saveInvestment, deleteInvestment, Investment } from './services/storageService';
+import { addPriceRecord, getPriceHistory, PriceHistoryRecord } from './services/priceHistoryService';
 import './App.css';
 
 const { Header, Content } = Layout;
@@ -12,12 +13,20 @@ const { Header, Content } = Layout;
 function App() {
   const [goldPrice, setGoldPrice] = useState<GoldPrice | null>(null);
   const [investments, setInvestments] = useState<Investment[]>([]);
+  const [priceHistory, setPriceHistory] = useState<PriceHistoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
 
   const loadGoldPrice = async () => {
     try {
       const price = await fetchGoldPrice();
       setGoldPrice(price);
+      
+      // 保存价格历史记录
+      addPriceRecord(price.goldPriceRmbGram, price.goldPriceUsdOz, price.exchangeRate);
+      
+      // 更新价格历史状态
+      const history = getPriceHistory();
+      setPriceHistory(history);
     } catch (error) {
       message.error('获取金价失败');
       console.error('Error fetching gold price:', error);
@@ -58,6 +67,10 @@ function App() {
     loadGoldPrice();
     loadInvestments();
     
+    // 加载价格历史
+    const history = getPriceHistory();
+    setPriceHistory(history);
+    
     const interval = setInterval(() => {
       loadGoldPrice();
     }, 60000);
@@ -82,6 +95,7 @@ function App() {
           <Dashboard 
             goldPrice={goldPrice} 
             investments={investments}
+            priceHistory={priceHistory}
           />
           <div style={{ 
             display: 'grid', 

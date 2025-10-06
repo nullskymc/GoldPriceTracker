@@ -1,5 +1,7 @@
 import { Card, Row, Col, Statistic, Spin } from 'antd';
 import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import PriceChart from './PriceChart';
+import { PriceHistoryRecord } from '../services/priceHistoryService';
 
 interface GoldPrice {
   goldPriceUsdOz: number;
@@ -18,9 +20,10 @@ interface Investment {
 interface DashboardProps {
   goldPrice: GoldPrice | null;
   investments: Investment[];
+  priceHistory: PriceHistoryRecord[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ goldPrice, investments }) => {
+const Dashboard: React.FC<DashboardProps> = ({ goldPrice, investments, priceHistory }) => {
   const calculateTotals = () => {
     if (!goldPrice || investments.length === 0) {
       return {
@@ -151,6 +154,11 @@ const Dashboard: React.FC<DashboardProps> = ({ goldPrice, investments }) => {
           </Col>
         </Row>
       )}
+
+      {/* 金价走势图 */}
+      <div style={{ marginTop: '16px' }}>
+        <PriceChart priceHistory={priceHistory} />
+      </div>
     </div>
   );
 };
