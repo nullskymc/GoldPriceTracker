@@ -71,9 +71,10 @@ function App() {
     const history = getPriceHistory();
     setPriceHistory(history);
     
+    // 每5分钟自动刷新一次金价
     const interval = setInterval(() => {
       loadGoldPrice();
-    }, 60000);
+    }, 300000); // 5分钟 = 300秒 = 300000毫秒
 
     return () => clearInterval(interval);
   }, []);
