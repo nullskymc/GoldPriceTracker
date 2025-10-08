@@ -19,24 +19,39 @@ export const fetchGoldPrice = async (preferredRateType: RateType = 'CNH'): Promi
     let actualRateType: RateType = preferredRateType;
     
     try {
-      // 优先使用 exchangerate.host API (支持 CNH 和 CNY)
-      const exchangeResponse = await axios.get('https://api.exchangerate.host/latest?base=USD&symbols=CNH,CNY');
+      // 优先使用 fawazahmed0 currency API (免费且支持 CNH 和 CNY)
+      const exchangeResponse = await axios.get('https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json');
       
       if (preferredRateType === 'CNH') {
         // 用户选择离岸人民币
-        exchangeRate = exchangeResponse.data.rates.CNH || exchangeResponse.data.rates.CNY;
-        actualRateType = exchangeResponse.data.rates.CNH ? 'CNH' : 'CNY';
+        exchangeRate = exchangeResponse.data.usd.cnh;
+        actualRateType = 'CNH';
+        console.log(`✓ 成功获取离岸人民币汇率 (CNH): ${exchangeRate}`);
       } else {
         // 用户选择在岸人民币
-        exchangeRate = exchangeResponse.data.rates.CNY;
+        exchangeRate = exchangeResponse.data.usd.cny;
         actualRateType = 'CNY';
+        console.log(`✓ 成功获取在岸人民币汇率 (CNY): ${exchangeRate}`);
+      }
+      
+      if (!exchangeRate || exchangeRate <= 0) {
+        throw new Error('Invalid exchange rate');
       }
     } catch (err) {
-      // 备用方案：使用 exchangerate-api.com (仅支持 CNY)
-      const exchangeResponse = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
-      exchangeRate = exchangeResponse.data.rates.CNY;
-      actualRateType = 'CNY';
-      console.log('使用在岸人民币汇率（CNY）作为备用');
+      console.warn('主API失败，尝试备用API:', err);
+      // 备用方案1：使用 open.er-api.com (仅支持 CNY)
+      try {
+        const exchangeResponse = await axios.get('https://open.er-api.com/v6/latest/USD');
+        exchangeRate = exchangeResponse.data.rates.CNY;
+        actualRateType = 'CNY';
+        console.warn('⚠ 主API失败，使用在岸人民币汇率（CNY）作为备用');
+      } catch (err2) {
+        // 备用方案2：使用 exchangerate-api.com (仅支持 CNY)
+        const exchangeResponse = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
+        exchangeRate = exchangeResponse.data.rates.CNY;
+        actualRateType = 'CNY';
+        console.warn('⚠ 备用API也失败，使用在岸人民币汇率（CNY）作为最终备用');
+      }
     }
 
     const GRAMS_PER_OUNCE = 31.1035;
