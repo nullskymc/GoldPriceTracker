@@ -6,7 +6,31 @@ export interface Investment {
   createdAt: string;
 }
 
+export type RateType = 'CNH' | 'CNY';
+
 const STORAGE_KEY = 'gold-investments';
+const RATE_TYPE_KEY = 'gold-rate-type';
+
+// 汇率类型相关
+export const getRateType = (): RateType => {
+  try {
+    const rateType = localStorage.getItem(RATE_TYPE_KEY);
+    return (rateType === 'CNY' || rateType === 'CNH') ? rateType : 'CNH';
+  } catch (error) {
+    console.error('读取汇率类型失败:', error);
+    return 'CNH';
+  }
+};
+
+export const saveRateType = (rateType: RateType): void => {
+  try {
+    localStorage.setItem(RATE_TYPE_KEY, rateType);
+  } catch (error) {
+    console.error('保存汇率类型失败:', error);
+  }
+};
+
+// 投资记录相关
 
 export const getInvestments = (): Investment[] => {
   try {

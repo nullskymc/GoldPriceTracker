@@ -3,8 +3,8 @@ import { Layout, message } from 'antd';
 import Dashboard from './components/Dashboard';
 import InvestmentForm from './components/InvestmentForm';
 import InvestmentList from './components/InvestmentList';
-import { fetchGoldPrice, GoldPrice } from './services/goldService';
-import { getInvestments, saveInvestment, deleteInvestment, Investment } from './services/storageService';
+import { fetchGoldPrice, GoldPrice, RateType } from './services/goldService';
+import { getInvestments, saveInvestment, deleteInvestment, Investment, getRateType, saveRateType } from './services/storageService';
 import { addPriceRecord, getPriceHistory, PriceHistoryRecord } from './services/priceHistoryService';
 import './App.css';
 
@@ -15,10 +15,12 @@ function App() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [priceHistory, setPriceHistory] = useState<PriceHistoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [rateType, setRateType] = useState<RateType>(() => getRateType());
 
-  const loadGoldPrice = async () => {
+  const loadGoldPrice = async (currentRateType?: RateType) => {
     try {
-      const price = await fetchGoldPrice();
+      const typeToUse = currentRateType || rateType;
+      const price = await fetchGoldPrice(typeToUse);
       setGoldPrice(price);
       
       // 保存价格历史记录
@@ -31,6 +33,13 @@ function App() {
       message.error('获取金价失败');
       console.error('Error fetching gold price:', error);
     }
+  };
+
+  const handleRateTypeChange = (newRateType: RateType) => {
+    setRateType(newRateType);
+    saveRateType(newRateType);
+    message.success(`已切换到${newRateType === 'CNH' ? '离岸' : '在岸'}人民币汇率`);
+    loadGoldPrice(newRateType);
   };
 
   const loadInvestments = () => {
@@ -97,6 +106,8 @@ function App() {
             goldPrice={goldPrice} 
             investments={investments}
             priceHistory={priceHistory}
+            rateType={rateType}
+            onRateTypeChange={handleRateTypeChange}
           />
           <div style={{ 
             display: 'grid', 

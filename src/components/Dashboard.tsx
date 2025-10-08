@@ -1,12 +1,15 @@
-import { Card, Row, Col, Statistic, Spin } from 'antd';
-import { ArrowUpOutlined, ArrowDownOutlined } from '@ant-design/icons';
+import { Card, Row, Col, Statistic, Spin, Drawer, Radio, Button, Space } from 'antd';
+import { ArrowUpOutlined, ArrowDownOutlined, SettingOutlined } from '@ant-design/icons';
+import { useState } from 'react';
 import PriceChart from './PriceChart';
 import { PriceHistoryRecord } from '../services/priceHistoryService';
+import { RateType } from '../services/storageService';
 
 interface GoldPrice {
   goldPriceUsdOz: number;
   exchangeRate: number;
   goldPriceRmbGram: number;
+  rateType: 'CNH' | 'CNY';
 }
 
 interface Investment {
@@ -21,9 +24,18 @@ interface DashboardProps {
   goldPrice: GoldPrice | null;
   investments: Investment[];
   priceHistory: PriceHistoryRecord[];
+  rateType: RateType;
+  onRateTypeChange: (rateType: RateType) => void;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ goldPrice, investments, priceHistory }) => {
+const Dashboard: React.FC<DashboardProps> = ({ 
+  goldPrice, 
+  investments, 
+  priceHistory,
+  rateType,
+  onRateTypeChange 
+}) => {
+  const [drawerVisible, setDrawerVisible] = useState(false);
   const calculateTotals = () => {
     if (!goldPrice || investments.length === 0) {
       return {
@@ -90,11 +102,19 @@ const Dashboard: React.FC<DashboardProps> = ({ goldPrice, investments, priceHist
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic
-              title="汇率（美元→人民币）"
-              value={goldPrice.exchangeRate}
-              precision={4}
-            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Statistic
+                title={`汇率（USD→${goldPrice.rateType}${goldPrice.rateType === 'CNH' ? ' 离岸' : ' 在岸'}）`}
+                value={goldPrice.exchangeRate}
+                precision={4}
+              />
+              <Button 
+                type="text" 
+                icon={<SettingOutlined />} 
+                onClick={() => setDrawerVisible(true)}
+                style={{ marginTop: -8 }}
+              />
+            </div>
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
@@ -159,6 +179,54 @@ const Dashboard: React.FC<DashboardProps> = ({ goldPrice, investments, priceHist
       <div style={{ marginTop: '16px' }}>
         <PriceChart priceHistory={priceHistory} />
       </div>
+
+      {/* 汇率设置抽屉 */}
+      <Drawer
+        title="汇率设置"
+        placement="right"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={360}
+      >
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <div>
+            <h3 style={{ marginBottom: 16 }}>选择汇率类型</h3>
+            <Radio.Group 
+              value={rateType} 
+              onChange={(e) => {
+                onRateTypeChange(e.target.value);
+                setDrawerVisible(false);
+              }}
+              style={{ width: '100%' }}
+            >
+              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+                <Radio value="CNH" style={{ width: '100%', padding: '12px', border: '1px solid #d9d9d9', borderRadius: '4px' }}>
+                  <div>
+                    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>离岸人民币 (CNH)</div>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                      境外交易的人民币汇率，市场化程度更高
+                    </div>
+                  </div>
+                </Radio>
+                <Radio value="CNY" style={{ width: '100%', padding: '12px', border: '1px solid #d9d9d9', borderRadius: '4px' }}>
+                  <div>
+                    <div style={{ fontWeight: 'bold', fontSize: '16px' }}>在岸人民币 (CNY)</div>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: 4 }}>
+                      境内交易的人民币汇率，受央行管理
+                    </div>
+                  </div>
+                </Radio>
+              </Space>
+            </Radio.Group>
+          </div>
+          
+          <div style={{ padding: '16px', background: '#f5f5f5', borderRadius: '4px' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: '#666' }}>
+              <strong>提示：</strong>切换汇率类型后，系统会自动刷新金价数据。离岸人民币汇率通常用于国际交易，而在岸人民币汇率用于境内交易。
+            </p>
+          </div>
+        </Space>
+      </Drawer>
     </div>
   );
 };
